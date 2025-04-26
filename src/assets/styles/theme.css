@@ -1,0 +1,18 @@
+:root {
+  --bg-dark: #181a20;
+  --text-light: #eaecef;
+  --text-muted: #848e9c;
+  --accent-yellow: #f0b90b;
+  --green: #0ecb81;
+  --red: #f6465d;
+  --border: #2b3139;
+  --font: "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  font-family: var(--font);
+}
