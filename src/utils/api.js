@@ -18,7 +18,12 @@ export async function getAllStocks(page = 1, count = 6) {
   );
   return response.data;
 }
-
+export async function getStockBySymbol(symbol) {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BACKEND_URL}/stocks/${symbol}`
+  );
+  return response.data[0];
+}
 export async function buyStock(symbol, quantity, token) {
   return await axios.post(
     `${process.env.REACT_APP_BACKEND_URL}/requests/buy-stock`,

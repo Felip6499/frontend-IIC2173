@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getAllStocks, buyStock } from "../../utils/api";
+import { getStockBySymbol, buyStock } from "../../utils/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import symbolToDomain from "../../utils/symbolToDomain";
 import ModalCompra from "../../components/common/ModalCompra";
@@ -11,7 +11,6 @@ function StockDetail() {
     useAuth0();
   const [stock, setStock] = useState(null);
   const [buying, setBuying] = useState({});
-  const [message, setMessage] = useState("");
   const [modalData, setModalData] = useState({
     open: false,
     success: false,
@@ -21,20 +20,25 @@ function StockDetail() {
     logoUrl: "",
     errorMessage: "",
   });
-  useEffect(() => {
-    async function fetchStock() {
-      const allStocks = await getAllStocks();
-      const selectedStock = allStocks.find((s) => s.symbol === symbol);
-      setStock(selectedStock);
+
+  const fetchStock = useCallback(async () => {
+    try {
+      const stockData = await getStockBySymbol(symbol);
+      setStock(stockData);
+    } catch (error) {
+      console.error("Error cargando stock:", error);
+      setStock(null);
     }
-    fetchStock();
   }, [symbol]);
+
+  useEffect(() => {
+    fetchStock();
+  }, [fetchStock]);
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
 
     if (!isAuthenticated) {
-      setMessage("Debes iniciar sesión para comprar.");
       loginWithRedirect();
       return;
     }
@@ -80,12 +84,6 @@ function StockDetail() {
         Cargando detalle de acción...
       </div>
     );
-  }
-
-  async function refreshStock() {
-    const allStocks = await getAllStocks();
-    const selectedStock = allStocks.find((s) => s.symbol === symbol);
-    setStock(selectedStock);
   }
 
   return (
@@ -151,20 +149,6 @@ function StockDetail() {
           >
             Cantidad disponible: {stock.quantity}
           </p>
-          {message && (
-            <div
-              style={{
-                backgroundColor: "#111",
-                color: "var(--text-light)",
-                padding: "1rem",
-                marginBottom: "1rem",
-                borderRadius: "8px",
-                textAlign: "center",
-              }}
-            >
-              {message}
-            </div>
-          )}
 
           <div style={{ marginTop: "1rem" }}>
             <input
@@ -202,11 +186,12 @@ function StockDetail() {
           </div>
         </div>
       </div>
+
       <ModalCompra
         isOpen={modalData.open}
         onClose={async () => {
           setModalData({ ...modalData, open: false });
-          await refreshStock();
+          await fetchStock();
         }}
         success={modalData.success}
         logoUrl={modalData.logoUrl}
