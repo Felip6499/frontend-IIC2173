@@ -15,9 +15,11 @@ function Wallet() {
     isLoading: authLoading,
     loginWithRedirect,
   } = useAuth0();
+
   const [balance, setBalance] = useState(0);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [addAmount, setAddAmount] = useState("");
 
   useEffect(() => {
     async function fetchWalletData() {
@@ -49,11 +51,19 @@ function Wallet() {
       return;
     }
 
+    const amountToAdd = parseInt(addAmount, 10);
+
+    if (isNaN(amountToAdd) || amountToAdd <= 0) {
+      alert("Ingresa una cantidad válida mayor a 0");
+      return;
+    }
+
     try {
-      const newBalance = balance + 1000;
+      const newBalance = balance + amountToAdd;
       const token = await getAccessTokenSilently();
       await updateUserMoney(newBalance, token);
       setBalance(newBalance);
+      setAddAmount("");
     } catch (error) {
       console.error("Error al actualizar el dinero:", error);
     }
@@ -81,20 +91,37 @@ function Wallet() {
         <p style={{ fontSize: "2rem", margin: 0 }}>
           ${balance.toLocaleString()}
         </p>
-        <button
-          onClick={handleAddFunds}
-          style={{
-            marginTop: "1rem",
-            padding: "0.5rem 1rem",
-            backgroundColor: "var(--accent-yellow)",
-            border: "none",
-            borderRadius: "8px",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          Recargar $1000
-        </button>
+
+        <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
+          <input
+            type="number"
+            min="1"
+            placeholder="Cantidad a recargar"
+            value={addAmount}
+            onChange={(e) => setAddAmount(e.target.value)}
+            style={{
+              flex: 1,
+              padding: "0.5rem",
+              borderRadius: "8px",
+              border: "1px solid var(--accent-yellow)",
+              backgroundColor: "transparent",
+              color: "var(--text-light)",
+            }}
+          />
+          <button
+            onClick={handleAddFunds}
+            style={{
+              padding: "0.5rem 1rem",
+              backgroundColor: "var(--accent-yellow)",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "bold",
+            }}
+          >
+            Recargar
+          </button>
+        </div>
       </div>
 
       <h2>Mis Compras</h2>
