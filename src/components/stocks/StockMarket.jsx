@@ -14,11 +14,15 @@ function StockMarket() {
     getAccessTokenSilently,
     isLoading: authLoading,
   } = useAuth0();
-  const [stocks, setStocks] = useState([]);
+
+  const [allStocks, setAllStocks] = useState([]);
+  const [filteredStocks, setFilteredStocks] = useState([]);
   const [buying, setBuying] = useState({});
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [sortOption, setSortOption] = useState("date-desc");
   const [modalData, setModalData] = useState({
     open: false,
     success: false,
@@ -31,16 +35,38 @@ function StockMarket() {
 
   const navigate = useNavigate();
 
-  async function fetchStocks(page = 1) {
+  async function fetchStocks() {
     setLoading(true);
-    const data = await getAllStocks(page, ITEMS_PER_PAGE);
-    setStocks(data);
+    const data = await getAllStocks(1, 25);
+    setAllStocks(data);
+    setFilteredStocks(data);
     setLoading(false);
   }
 
   useEffect(() => {
-    fetchStocks(currentPage);
-  }, [currentPage]);
+    fetchStocks();
+  }, []);
+
+  useEffect(() => {
+    let filtered = allStocks.filter(
+      (stock) =>
+        stock.symbol.toLowerCase().includes(search.toLowerCase()) ||
+        stock.longName.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (sortOption === "price-asc") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sortOption === "price-desc") {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (sortOption === "date-asc") {
+      filtered.sort((a, b) => new Date(a.updatedAt) - new Date(b.updatedAt));
+    } else if (sortOption === "date-desc") {
+      filtered.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+    }
+
+    setFilteredStocks(filtered);
+    setCurrentPage(1);
+  }, [search, sortOption, allStocks]);
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
@@ -55,7 +81,7 @@ function StockMarket() {
       const token = await getAccessTokenSilently();
       const quantity = parseInt(buying[symbol], 10);
       await buyStock(symbol, quantity, token);
-      const stockData = stocks.find((s) => s.symbol === symbol);
+      const stockData = filteredStocks.find((s) => s.symbol === symbol);
       setModalData({
         open: true,
         success: true,
@@ -96,13 +122,57 @@ function StockMarket() {
     );
   }
 
-  const currentStocks = stocks;
+  const indexOfLastStock = currentPage * ITEMS_PER_PAGE;
+  const indexOfFirstStock = indexOfLastStock - ITEMS_PER_PAGE;
+  const currentStocks = filteredStocks.slice(
+    indexOfFirstStock,
+    indexOfLastStock
+  );
+  const totalPages = Math.ceil(filteredStocks.length / ITEMS_PER_PAGE);
 
   return (
     <div style={{ padding: "2rem" }}>
-      <h1 style={{ color: "var(--accent-yellow)", marginBottom: "2rem" }}>
+      <h1 style={{ color: "var(--accent-yellow)", marginBottom: "1rem" }}>
         Mercado de Acciones
       </h1>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <input
+          type="text"
+          placeholder="Buscar por símbolo o nombre..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "0.8rem",
+            borderRadius: "8px",
+            border: "1px solid var(--accent-yellow)",
+            backgroundColor: "transparent",
+            color: "var(--text-light)",
+          }}
+        />
+      </div>
+
+      <div style={{ marginBottom: "2rem" }}>
+        <select
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "0.8rem",
+            borderRadius: "8px",
+            border: "1px solid var(--accent-yellow)",
+            backgroundColor: "var(--border)",
+            color: "var(--accent-yellow)",
+            marginBottom: "1rem",
+          }}
+        >
+          <option value="date-desc">Fecha (más reciente primero)</option>
+          <option value="date-asc">Fecha (más antigua primero)</option>
+          <option value="price-asc">Precio (menor a mayor)</option>
+          <option value="price-desc">Precio (mayor a menor)</option>
+        </select>
+      </div>
 
       {message && (
         <div
@@ -150,7 +220,7 @@ function StockMarket() {
                   {stock.longName}
                 </p>
                 <p style={{ fontSize: "1.2rem", margin: "1rem 0" }}>
-                  Precio: ${stock.price.toFixed(0)}
+                  Precio: ${stock.price.toLocaleString()}
                 </p>
                 <p style={{ margin: 0 }}>
                   Cantidad disponible: {stock.quantity}
@@ -224,20 +294,15 @@ function StockMarket() {
           Anterior
         </button>
         <button
-          disabled={stocks.length < ITEMS_PER_PAGE || stocks.length === 0}
+          disabled={currentPage === totalPages}
           onClick={() => setCurrentPage(currentPage + 1)}
           style={{
             padding: "0.5rem 1rem",
             borderRadius: "6px",
             backgroundColor:
-              stocks.length < ITEMS_PER_PAGE || stocks.length === 0
-                ? "gray"
-                : "var(--accent-yellow)",
+              currentPage === totalPages ? "gray" : "var(--accent-yellow)",
             border: "none",
-            cursor:
-              stocks.length < ITEMS_PER_PAGE || stocks.length === 0
-                ? "not-allowed"
-                : "pointer",
+            cursor: currentPage === totalPages ? "not-allowed" : "pointer",
           }}
         >
           Siguiente
@@ -248,7 +313,7 @@ function StockMarket() {
         isOpen={modalData.open}
         onClose={async () => {
           setModalData({ ...modalData, open: false });
-          await fetchStocks(currentPage);
+          await fetchStocks();
         }}
         success={modalData.success}
         logoUrl={modalData.logoUrl}

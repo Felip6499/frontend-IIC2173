@@ -35,3 +35,39 @@ export async function buyStock(symbol, quantity, token) {
     }
   );
 }
+export async function getUserProfile(token) {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BACKEND_URL}/user/me`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function getUserPurchases(token) {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BACKEND_URL}/user/requests`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function updateUserMoney(money, token) {
+  const response = await axios.put(
+    `${process.env.REACT_APP_BACKEND_URL}/user/update-money`,
+    { money },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+}

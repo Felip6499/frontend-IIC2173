@@ -1,16 +1,67 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  getUserProfile,
+  getUserPurchases,
+  updateUserMoney,
+} from "../../utils/api";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useNavigate } from "react-router-dom";
 
 function Wallet() {
-  const [balance, setBalance] = useState(10000); // Mock inicial de saldo
-  const [purchases] = useState([
-    // Mock de compras realizadas
-    { symbol: "AAPL", quantity: 2, price: 150 },
-    { symbol: "GOOGL", quantity: 1, price: 2700 },
-  ]);
+  const navigate = useNavigate();
+  const {
+    getAccessTokenSilently,
+    isAuthenticated,
+    isLoading: authLoading,
+    loginWithRedirect,
+  } = useAuth0();
+  const [balance, setBalance] = useState(0);
+  const [purchases, setPurchases] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleAddFunds = () => {
-    setBalance(balance + 1000); // Mock: agregar $1000
+  useEffect(() => {
+    async function fetchWalletData() {
+      try {
+        const token = await getAccessTokenSilently();
+        const userInfo = await getUserProfile(token);
+        const userPurchases = await getUserPurchases(token);
+
+        setBalance(userInfo.money || 0);
+
+        const sortedPurchases = (userPurchases || []).sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        );
+
+        setPurchases(sortedPurchases);
+      } catch (error) {
+        console.error("Error cargando datos de Wallet:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchWalletData();
+  }, [getAccessTokenSilently]);
+
+  const handleAddFunds = async () => {
+    if (!isAuthenticated) {
+      loginWithRedirect();
+      return;
+    }
+
+    try {
+      const newBalance = balance + 1000;
+      const token = await getAccessTokenSilently();
+      await updateUserMoney(newBalance, token);
+      setBalance(newBalance);
+    } catch (error) {
+      console.error("Error al actualizar el dinero:", error);
+    }
   };
+
+  if (authLoading || loading) {
+    return <div style={{ padding: "2rem" }}>Cargando Wallet...</div>;
+  }
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -46,7 +97,7 @@ function Wallet() {
         </button>
       </div>
 
-      <h2>Mis compras</h2>
+      <h2>Mis Compras</h2>
 
       {purchases.length === 0 ? (
         <p>No has comprado acciones aún.</p>
@@ -59,12 +110,43 @@ function Wallet() {
                 backgroundColor: "var(--border)",
                 padding: "1rem",
                 borderRadius: "8px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                cursor: "pointer",
               }}
+              onClick={() => navigate(`/stocks/${purchase.symbol}`)}
             >
-              <p style={{ margin: 0 }}>
-                <strong>{purchase.symbol}</strong> — {purchase.quantity}{" "}
-                acciones a ${purchase.price.toFixed(0)}
-              </p>
+              <div>
+                <p style={{ margin: 0 }}>
+                  <strong>{purchase.symbol}</strong> — {purchase.quantity}{" "}
+                  acciones
+                </p>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "0.9rem",
+                    color: "var(--text-muted)",
+                  }}
+                >
+                  {new Date(purchase.timestamp).toLocaleString()}
+                </p>
+              </div>
+
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontWeight: "bold",
+                    color:
+                      purchase.status === "ACCEPTED"
+                        ? "var(--green)"
+                        : "var(--red)",
+                  }}
+                >
+                  {purchase.status}
+                </p>
+              </div>
             </div>
           ))}
         </div>
