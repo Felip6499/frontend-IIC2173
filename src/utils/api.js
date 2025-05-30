@@ -1,5 +1,60 @@
 import axios from "axios";
 
+export async function initiatePayment(symbol, quantity, token) {
+  const response = await axios.post(
+    `${process.env.REACT_APP_BACKEND_URL}/webpay/pay`,
+    { symbol, quantity },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function confirmPayment(token_ws, token) {
+  const response = await axios.post(
+    `${process.env.REACT_APP_BACKEND_URL}/webpay/confirm`,
+    { token_ws },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function getEstimations(token) {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BACKEND_URL}/estimations`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data;
+}
+
+export async function getHeartbeat(token) {
+  try {
+    const response = await axios.get(
+      `${process.env.REACT_APP_BACKEND_URL}/estimations/heartbeat`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching heartbeat:", error);
+    return { alive: false };
+  }
+}
+
 export async function getTopStocks() {
   try {
     const response = await axios.get(

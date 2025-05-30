@@ -1,22 +1,51 @@
 import React, { useEffect, useState } from "react";
-import { getTopStocks } from "../../utils/api";
+import { useAuth0 } from "@auth0/auth0-react";
+import { getTopStocks, getHeartbeat } from "../../utils/api";
 import StockPreview from "./StockPreview";
 import img1 from "../../assets/images/Imagen1.jpg";
 import img2 from "../../assets/images/Imagen2.jpg";
 import img3 from "../../assets/images/Imagen3.jpg";
+
 function Home() {
+  const { getAccessTokenSilently } = useAuth0();
   const [stocks, setStocks] = useState([]);
+  const [heartbeat, setHeartbeat] = useState(false);
 
   useEffect(() => {
-    async function fetchStocks() {
+    async function fetchData() {
       const data = await getTopStocks();
       setStocks(data.slice(0, 5));
     }
-    fetchStocks();
-  }, []);
+
+    async function fetchHeartbeat() {
+      const token = await getAccessTokenSilently();
+      const data = await getHeartbeat(token);
+      setHeartbeat(data.alive);
+    }
+
+    fetchData();
+    fetchHeartbeat();
+    const interval = setInterval(fetchHeartbeat, 60000);
+    return () => clearInterval(interval);
+  }, [getAccessTokenSilently]);
 
   return (
     <div style={{ padding: "2rem" }}>
+      <div
+        style={{ display: "flex", alignItems: "center", marginBottom: "2rem" }}
+      >
+        <div
+          style={{
+            width: "15px",
+            height: "15px",
+            borderRadius: "50%",
+            backgroundColor: heartbeat ? "green" : "red",
+            marginRight: "0.5rem",
+          }}
+        ></div>
+        <h3 style={{ margin: 0, color: "var(--text-light)" }}>Workers</h3>
+      </div>
+
       <div
         style={{
           display: "flex",

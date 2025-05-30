@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getStockBySymbol, buyStock } from "../../utils/api";
+import { getStockBySymbol, initiatePayment} from "../../utils/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import symbolToDomain from "../../utils/symbolToDomain";
 import ModalCompra from "../../components/common/ModalCompra";
@@ -37,33 +37,36 @@ function StockDetail() {
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
-
+  
     if (!isAuthenticated) {
       loginWithRedirect();
       return;
     }
-
+  
     try {
       const token = await getAccessTokenSilently();
       const quantity = parseInt(buying[symbol], 10);
-      await buyStock(symbol, quantity, token);
-
-      setModalData({
-        open: true,
-        success: true,
-        quantity,
-        unitPrice: stock.price,
-        symbol,
-        logoUrl: symbolToDomain[symbol]
-          ? `https://logo.clearbit.com/${symbolToDomain[symbol]}`
-          : "",
-        errorMessage: "",
-      });
-
-      setBuying({});
+  
+      const paymentData = await initiatePayment(symbol, quantity, token);
+  
+      if (paymentData && paymentData.url && paymentData.token) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = paymentData.url;
+  
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "token_ws";
+        input.value = paymentData.token;
+  
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        console.error("No se recibió una URL de Webpay para la redirección.");
+      }
     } catch (err) {
-      console.error("Error al comprar:", err.response?.data || err);
-
+      console.error("Error al iniciar el pago:", err.response?.data || err);
       setModalData({
         open: true,
         success: false,
@@ -73,7 +76,7 @@ function StockDetail() {
         logoUrl: symbolToDomain[symbol]
           ? `https://logo.clearbit.com/${symbolToDomain[symbol]}`
           : "",
-        errorMessage: err.response?.data?.error || "Error interno",
+        errorMessage: err.response?.data?.error || "Error al iniciar el pago.",
       });
     }
   };

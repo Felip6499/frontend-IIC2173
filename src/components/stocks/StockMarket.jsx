@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getAllStocks, buyStock } from "../../utils/api";
+import { getAllStocks, initiatePayment} from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import symbolToDomain from "../../utils/symbolToDomain";
 import ModalCompra from "../../components/common/ModalCompra";
@@ -18,7 +18,6 @@ function StockMarket() {
   const [allStocks, setAllStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
   const [buying, setBuying] = useState({});
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -70,34 +69,37 @@ function StockMarket() {
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
-
+  
     if (!isAuthenticated) {
-      setMessage("Debes iniciar sesión para comprar.");
       loginWithRedirect();
       return;
     }
-
+  
     try {
       const token = await getAccessTokenSilently();
       const quantity = parseInt(buying[symbol], 10);
-      await buyStock(symbol, quantity, token);
-      const stockData = filteredStocks.find((s) => s.symbol === symbol);
-      setModalData({
-        open: true,
-        success: true,
-        quantity,
-        unitPrice: stockData.price,
-        symbol,
-        logoUrl: symbolToDomain[symbol]
-          ? `https://logo.clearbit.com/${symbolToDomain[symbol]}`
-          : "",
-        errorMessage: "",
-      });
-
-      setBuying({});
+  
+      const paymentData = await initiatePayment(symbol, quantity, token);
+  
+      if (paymentData && paymentData.url && paymentData.token) {
+        // Construir el formulario dinámicamente
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = paymentData.url;
+  
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = "token_ws";
+        input.value = paymentData.token;
+  
+        form.appendChild(input);
+        document.body.appendChild(form);
+        form.submit();
+      } else {
+        console.error("No se recibió una URL de Webpay para la redirección.");
+      }
     } catch (err) {
-      console.error("Error al comprar:", err.response?.data || err);
-
+      console.error("Error al iniciar el pago:", err.response?.data || err);
       setModalData({
         open: true,
         success: false,
@@ -107,7 +109,7 @@ function StockMarket() {
         logoUrl: symbolToDomain[symbol]
           ? `https://logo.clearbit.com/${symbolToDomain[symbol]}`
           : "",
-        errorMessage: err.response?.data?.error || "Error interno",
+        errorMessage: err.response?.data?.error || "Error al iniciar el pago.",
       });
     }
   };
@@ -173,21 +175,6 @@ function StockMarket() {
           <option value="price-desc">Precio (mayor a menor)</option>
         </select>
       </div>
-
-      {message && (
-        <div
-          style={{
-            backgroundColor: "var(--border)",
-            color: "var(--text-light)",
-            padding: "1rem",
-            marginBottom: "2rem",
-            borderRadius: "8px",
-            textAlign: "center",
-          }}
-        >
-          {message}
-        </div>
-      )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
         {currentStocks.map((stock) => (

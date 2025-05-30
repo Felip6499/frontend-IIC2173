@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  getUserProfile,
-  getUserPurchases,
-  updateUserMoney,
-} from "../../utils/api";
+import { getEstimations, getUserPurchases } from "../../utils/api";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
 
@@ -11,118 +7,85 @@ function Wallet() {
   const navigate = useNavigate();
   const {
     getAccessTokenSilently,
-    isAuthenticated,
     isLoading: authLoading,
-    loginWithRedirect,
   } = useAuth0();
 
-  const [balance, setBalance] = useState(0);
+  const [estimations, setEstimations] = useState(null);
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [addAmount, setAddAmount] = useState("");
 
   useEffect(() => {
-    async function fetchWalletData() {
+    async function fetchData() {
       try {
         const token = await getAccessTokenSilently();
-        const userInfo = await getUserProfile(token);
+        const estimationData = await getEstimations(token);
         const userPurchases = await getUserPurchases(token);
 
-        setBalance(userInfo.money || 0);
-
+        setEstimations(estimationData.result);
         const sortedPurchases = (userPurchases || []).sort(
           (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
         );
-
         setPurchases(sortedPurchases);
       } catch (error) {
-        console.error("Error cargando datos de Wallet:", error);
+        console.error("Error cargando datos:", error);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchWalletData();
+    fetchData();
   }, [getAccessTokenSilently]);
 
-  const handleAddFunds = async () => {
-    if (!isAuthenticated) {
-      loginWithRedirect();
-      return;
-    }
-
-    const amountToAdd = parseInt(addAmount, 10);
-
-    if (isNaN(amountToAdd) || amountToAdd <= 0) {
-      alert("Ingresa una cantidad válida mayor a 0");
-      return;
-    }
-
-    try {
-      const newBalance = balance + amountToAdd;
-      const token = await getAccessTokenSilently();
-      await updateUserMoney(newBalance, token);
-      setBalance(newBalance);
-      setAddAmount("");
-    } catch (error) {
-      console.error("Error al actualizar el dinero:", error);
-    }
-  };
-
   if (authLoading || loading) {
-    return <div style={{ padding: "2rem" }}>Cargando Wallet...</div>;
+    return <div style={{ padding: "2rem" }}>Cargando datos...</div>;
   }
 
   return (
     <div style={{ padding: "2rem" }}>
       <h1 style={{ color: "var(--accent-yellow)", marginBottom: "2rem" }}>
-        Mi Wallet
+        Estimaciones de Ganancias
       </h1>
 
-      <div
-        style={{
-          backgroundColor: "var(--border)",
-          padding: "1.5rem",
-          borderRadius: "10px",
-          marginBottom: "2rem",
-        }}
-      >
-        <h2>Saldo disponible:</h2>
-        <p style={{ fontSize: "2rem", margin: 0 }}>
-          ${balance.toLocaleString()}
-        </p>
+      {estimations ? (
+        <div
+          style={{
+            backgroundColor: "var(--border)",
+            padding: "1.5rem",
+            borderRadius: "10px",
+            marginBottom: "2rem",
+          }}
+        >
+          <h2>Ganancia estimada total:</h2>
+          <p style={{ fontSize: "2rem", margin: 0 }}>
+            ${estimations.estimated_gains.toLocaleString()}
+          </p>
 
-        <div style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}>
-          <input
-            type="number"
-            min="1"
-            placeholder="Cantidad a recargar"
-            value={addAmount}
-            onChange={(e) => setAddAmount(e.target.value)}
-            style={{
-              flex: 1,
-              padding: "0.5rem",
-              borderRadius: "8px",
-              border: "1px solid var(--accent-yellow)",
-              backgroundColor: "transparent",
-              color: "var(--text-light)",
-            }}
-          />
-          <button
-            onClick={handleAddFunds}
-            style={{
-              padding: "0.5rem 1rem",
-              backgroundColor: "var(--accent-yellow)",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
-          >
-            Recargar
-          </button>
+          <h3 style={{ marginTop: "1rem" }}>Detalle por acción:</h3>
+          {estimations.details.map((detail, index) => (
+            <div
+              key={index}
+              style={{
+                backgroundColor: "var(--background)",
+                padding: "1rem",
+                borderRadius: "8px",
+                marginTop: "0.5rem",
+              }}
+            >
+              <p style={{ margin: 0 }}>
+                <strong>{detail.symbol}</strong>: {detail.quantity} acciones
+              </p>
+              <p style={{ margin: 0 }}>
+                Actual: ${detail.current} / Proyectado: ${detail.projected}
+              </p>
+              <p style={{ margin: 0 }}>
+                Valor estimado: ${detail.estimated_value}
+              </p>
+            </div>
+          ))}
         </div>
-      </div>
+      ) : (
+        <p>No se encontraron estimaciones.</p>
+      )}
 
       <h2>Mis Compras</h2>
 

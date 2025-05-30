@@ -4,6 +4,7 @@ import StockPage from "../../pages/StockPage";
 import WalletPage from "../../pages/WalletPage";
 import StockDetailPage from "../../pages/StockDetailPage";
 import Navbar from "../layout/Navbar";
+import PaymentConfirmationPage from "../../pages/PaymentConfirmationPage";
 
 function Routing() {
   return (
@@ -14,6 +15,7 @@ function Routing() {
         <Route path="/stocks" element={<StockPage />} />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/stocks/:symbol" element={<StockDetailPage />} />
+        <Route path="/payment/confirm" element={<PaymentConfirmationPage />} />
       </Routes>
     </BrowserRouter>
   );
