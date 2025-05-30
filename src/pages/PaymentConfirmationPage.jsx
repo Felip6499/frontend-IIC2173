@@ -50,11 +50,11 @@ function PaymentConfirmationPage() {
         setMessage(
           "Has cancelado la transacción. Si necesitas ayuda, contáctanos."
         );
-        setTimeout(() => navigate("/wallet"), 15000);
+        setTimeout(() => navigate("/wallet"), 60000);
       } else {
         setStatus("error");
         setMessage("Ocurrió un error al procesar tu pago o la sesión expiró.");
-        setTimeout(() => navigate("/wallet"), 15000);
+        setTimeout(() => navigate("/wallet"), 60000);
       }
     };
 
