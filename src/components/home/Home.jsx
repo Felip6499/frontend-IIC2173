@@ -14,6 +14,9 @@ function Home() {
   useEffect(() => {
     async function fetchData() {
       const token = await getAccessTokenSilently();
+      console.log("Fetching top stocks for user:", user.name);
+      console.log("user:", user);
+      console.log("user.email:", user.email);
       const data = await getTopStocks(token, user.name);
       setStocks(data.slice(0, 5));
     }
