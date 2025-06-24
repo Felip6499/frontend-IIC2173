@@ -28,7 +28,7 @@ function Home() {
     fetchHeartbeat();
     const interval = setInterval(fetchHeartbeat, 60000);
     return () => clearInterval(interval);
-  }, [getAccessTokenSilently]);
+  }, [getAccessTokenSilently, user]);
 
   return (
     <div style={{ padding: "2rem" }}>
