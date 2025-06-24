@@ -5,9 +5,11 @@ import { useAuth0 } from "@auth0/auth0-react";
 import symbolToDomain from "../../utils/symbolToDomain";
 import ModalCompra from "../../components/common/ModalCompra";
 
+const { getAccessTokenSilently } = useAuth0();
+
 function StockDetail() {
   const { symbol } = useParams();
-  const { isAuthenticated, loginWithRedirect, getAccessTokenSilently } =
+  const { isAuthenticated, loginWithRedirect } =
     useAuth0();
   const [stock, setStock] = useState(null);
   const [buying, setBuying] = useState({});
@@ -23,8 +25,6 @@ function StockDetail() {
 
   const fetchStock = useCallback(async () => {
     try {
-      const { getAccessTokenSilently } =
-      useAuth0();
       const token = await getAccessTokenSilently();
       const stockData = await getStockBySymbol(symbol, token);
       setStock(stockData);
