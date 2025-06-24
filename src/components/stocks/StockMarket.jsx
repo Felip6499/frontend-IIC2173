@@ -45,7 +45,7 @@ function StockMarket() {
 
   useEffect(() => {
     fetchStocks();
-  }, []);
+  }, [fetchStocks]);
 
   useEffect(() => {
     let filtered = allStocks.filter(
