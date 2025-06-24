@@ -13,7 +13,8 @@ function Home() {
 
   useEffect(() => {
     async function fetchData() {
-      const data = await getTopStocks();
+      const token = await getAccessTokenSilently();
+      const data = await getTopStocks(token);
       setStocks(data.slice(0, 5));
     }
 

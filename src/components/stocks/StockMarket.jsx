@@ -35,8 +35,9 @@ function StockMarket() {
   const navigate = useNavigate();
 
   async function fetchStocks() {
+    const token = await getAccessTokenSilently();
     setLoading(true);
-    const data = await getAllStocks(1, 25);
+    const data = await getAllStocks(1, 25, token);
     setAllStocks(data);
     setFilteredStocks(data);
     setLoading(false);

@@ -55,10 +55,15 @@ export async function getHeartbeat(token) {
   }
 }
 
-export async function getTopStocks() {
+export async function getTopStocks(token) {
   try {
     const response = await axios.get(
-      `${process.env.REACT_APP_BACKEND_URL}/stocks`
+      `${process.env.REACT_APP_BACKEND_URL}/stocks`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
     return response.data;
   } catch (error) {
@@ -67,15 +72,25 @@ export async function getTopStocks() {
   }
 }
 
-export async function getAllStocks(page = 1, count = 6) {
+export async function getAllStocks(page = 1, count = 6, token) {
   const response = await axios.get(
-    `${process.env.REACT_APP_BACKEND_URL}/stocks?page=${page}&count=${count}`
+    `${process.env.REACT_APP_BACKEND_URL}/stocks?page=${page}&count=${count}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      }
   );
   return response.data;
 }
-export async function getStockBySymbol(symbol) {
+export async function getStockBySymbol(symbol, token) {
   const response = await axios.get(
-    `${process.env.REACT_APP_BACKEND_URL}/stocks/${symbol}`
+    `${process.env.REACT_APP_BACKEND_URL}/stocks/${symbol}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      }
   );
   return response.data[0];
 }

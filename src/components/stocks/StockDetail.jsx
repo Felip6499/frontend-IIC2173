@@ -23,7 +23,8 @@ function StockDetail() {
 
   const fetchStock = useCallback(async () => {
     try {
-      const stockData = await getStockBySymbol(symbol);
+      const token = await getAccessTokenSilently();
+      const stockData = await getStockBySymbol(symbol, token);
       setStock(stockData);
     } catch (error) {
       console.error("Error cargando stock:", error);
