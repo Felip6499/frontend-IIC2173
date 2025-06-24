@@ -21,18 +21,18 @@ function StockDetail() {
     errorMessage: "",
   });
 
-  useEffect(() => {
-    const fetchStock = async () => {
-      try {
-        const token = await getAccessTokenSilently();
-        const stockData = await getStockBySymbol(symbol, token);
-        setStock(stockData);
-      } catch (error) {
-        console.error("Error cargando stock:", error);
-        setStock(null);
-      }
-    };
+  const fetchStock = async () => {
+    try {
+      const token = await getAccessTokenSilently();
+      const stockData = await getStockBySymbol(symbol, token);
+      setStock(stockData);
+    } catch (error) {
+      console.error("Error cargando stock:", error);
+      setStock(null);
+    }
+  };
 
+  useEffect(() => {
     fetchStock();
   }, [symbol, getAccessTokenSilently]);
 
