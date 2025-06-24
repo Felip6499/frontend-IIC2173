@@ -57,6 +57,7 @@ export async function getHeartbeat(token) {
 
 export async function getTopStocks(token, email) {
   try {
+    console.log("Fetching top stocks for email:", email);
     const response = await axios.get(
       `${process.env.REACT_APP_BACKEND_URL}/stocks`,
       { email },
