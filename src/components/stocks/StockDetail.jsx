@@ -21,21 +21,20 @@ function StockDetail() {
     errorMessage: "",
   });
 
-  const token = getAccessTokenSilently();
-
-  const fetchStock = useCallback(async () => {
-    try {
-      const stockData = await getStockBySymbol(symbol, token);
-      setStock(stockData);
-    } catch (error) {
-      console.error("Error cargando stock:", error);
-      setStock(null);
-    }
-  }, [symbol]);
-
   useEffect(() => {
+    const fetchStock = async () => {
+      try {
+        const token = await getAccessTokenSilently();
+        const stockData = await getStockBySymbol(symbol, token);
+        setStock(stockData);
+      } catch (error) {
+        console.error("Error cargando stock:", error);
+        setStock(null);
+      }
+    };
+
     fetchStock();
-  }, [fetchStock]);
+  }, [symbol, getAccessTokenSilently]);
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
