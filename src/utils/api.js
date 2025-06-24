@@ -59,11 +59,11 @@ export async function getTopStocks(token, email) {
   try {
     const response = await axios.get(
       `${process.env.REACT_APP_BACKEND_URL}/stocks`,
+      { email },
       {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        data: { email}
       }
     );
     return response.data;
