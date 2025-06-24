@@ -7,14 +7,14 @@ import img2 from "../../assets/images/Imagen2.jpg";
 import img3 from "../../assets/images/Imagen3.jpg";
 
 function Home() {
-  const { getAccessTokenSilently } = useAuth0();
+  const { getAccessTokenSilently, user } = useAuth0();
   const [stocks, setStocks] = useState([]);
   const [heartbeat, setHeartbeat] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       const token = await getAccessTokenSilently();
-      const data = await getTopStocks(token);
+      const data = await getTopStocks(token, user.name);
       setStocks(data.slice(0, 5));
     }
 
