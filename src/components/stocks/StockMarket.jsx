@@ -34,14 +34,15 @@ function StockMarket() {
 
   const navigate = useNavigate();
 
-  async function fetchStocks() {
+  const fetchStocks = useCallback(async () => {
     const token = await getAccessTokenSilently();
     setLoading(true);
     const data = await getAllStocks(1, 25, token);
     setAllStocks(data);
     setFilteredStocks(data);
     setLoading(false);
-  }
+  }, [getAccessTokenSilently]);
+
 
   useEffect(() => {
     fetchStocks();
