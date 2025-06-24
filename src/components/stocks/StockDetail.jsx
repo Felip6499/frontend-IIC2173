@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getStockBySymbol, initiatePayment} from "../../utils/api";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -21,20 +21,21 @@ function StockDetail() {
     errorMessage: "",
   });
 
-  const fetchStock = async () => {
-    try {
-      const token = await getAccessTokenSilently();
-      const stockData = await getStockBySymbol(symbol, token);
-      setStock(stockData);
-    } catch (error) {
-      console.error("Error cargando stock:", error);
-      setStock(null);
-    }
-  };
+const fetchStock = useCallback(async () => {
+  try {
+    const token = await getAccessTokenSilently();
+    const stockData = await getStockBySymbol(symbol, token); // nuevo parámetro
+    setStock(stockData);
+  } catch (error) {
+    console.error("Error cargando stock:", error);
+    setStock(null);
+  }
+}, [symbol, getAccessTokenSilently]);
+
 
   useEffect(() => {
     fetchStock();
-  }, [symbol, getAccessTokenSilently, fetchStock]);
+  }, [fetchStock]);
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
