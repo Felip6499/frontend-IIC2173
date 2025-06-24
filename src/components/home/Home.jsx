@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getTopStocks, getHeartbeat } from "../../utils/api";
+import { getTopStocks, getHeartbeat, postUserEmail } from "../../utils/api";
 import StockPreview from "./StockPreview";
 import img1 from "../../assets/images/Imagen1.jpg";
 import img2 from "../../assets/images/Imagen2.jpg";
@@ -12,6 +12,19 @@ function Home() {
   const [heartbeat, setHeartbeat] = useState(false);
 
   useEffect(() => {
+
+    async function registerUser() {
+      try {
+        const token = await getAccessTokenSilently();
+        if (user?.email) {
+          await postUserEmail(user.email, token);
+          console.log("Usuario registrado en backend:", user.email);
+        }
+      } catch (error) {
+        console.error("Error registrando usuario:", error);
+      }
+    }
+
     async function fetchData() {
       const token = await getAccessTokenSilently();
       console.log("Fetching top stocks for user:", user.name);
@@ -27,6 +40,7 @@ function Home() {
       setHeartbeat(data.alive);
     }
 
+    registerUser();
     fetchData();
     fetchHeartbeat();
     const interval = setInterval(fetchHeartbeat, 60000);

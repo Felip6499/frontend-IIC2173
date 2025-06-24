@@ -142,3 +142,22 @@ export async function updateUserMoney(money, token) {
   );
   return response.data;
 }
+
+export async function postUserEmail(email, token) {
+  try {
+    const response = await axios.post(
+      `${process.env.REACT_APP_BACKEND_URL}/user`,
+      { email },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Error en postUserEmail:", error.response?.data || error.message);
+    throw error;
+  }
+}
