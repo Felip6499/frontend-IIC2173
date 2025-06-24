@@ -23,6 +23,8 @@ function StockDetail() {
 
   const fetchStock = useCallback(async () => {
     try {
+      const { getAccessTokenSilently } =
+      useAuth0();
       const token = await getAccessTokenSilently();
       const stockData = await getStockBySymbol(symbol, token);
       setStock(stockData);
