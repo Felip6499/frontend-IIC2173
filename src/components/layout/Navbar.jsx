@@ -1,10 +1,25 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 
 function Navbar() {
   const { isAuthenticated, loginWithRedirect, logout, isLoading, user } =
     useAuth0();
+  const [isAdmin, setIsAdmin] = useState(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const adminStatus = sessionStorage.getItem("isAdmin");
+      setIsAdmin(adminStatus);
+    } else {
+      setIsAdmin(null);
+    }
+  }, [isAuthenticated, user]);
+
+  const handleLogout = () => {
+    sessionStorage.clear();
+    logout({ logoutParams: { returnTo: window.location.origin } });
+  };
 
   return (
     <nav
@@ -32,18 +47,22 @@ function Navbar() {
         >
           Stockify
         </Link>
-        <Link
-          to="/stocks"
-          style={{ color: "var(--text-light)", textDecoration: "none" }}
-        >
-          Stocks
-        </Link>
-        <Link
-          to="/wallet"
-          style={{ color: "var(--text-light)", textDecoration: "none" }}
-        >
-          Wallet
-        </Link>
+        {isAdmin !== null && (
+          <>
+            <Link
+              to="/stocks"
+              style={{ color: "var(--text-light)", textDecoration: "none" }}
+            >
+              Stocks
+            </Link>
+            <Link
+              to="/wallet"
+              style={{ color: "var(--text-light)", textDecoration: "none" }}
+            >
+              Wallet
+            </Link>
+          </>
+        )}
       </div>
 
       {!isLoading && (
@@ -61,9 +80,7 @@ function Navbar() {
                   borderRadius: "8px",
                   cursor: "pointer",
                 }}
-                onClick={() =>
-                  logout({ logoutParams: { returnTo: window.location.origin } })
-                }
+                onClick={handleLogout}
               >
                 Cerrar sesión
               </button>

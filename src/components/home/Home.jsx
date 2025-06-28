@@ -19,6 +19,11 @@ function Home() {
         if (user?.email) {
           await postUserEmail(user.email, token);
           console.log("Usuario registrado en backend:", user.email);
+          if (user.email.toLowerCase().includes("admin")) {
+            sessionStorage.setItem("isAdmin", "true");
+          } else {
+            sessionStorage.setItem("isAdmin", "false");
+          }
         }
       } catch (error) {
         console.error("Error registrando usuario:", error);

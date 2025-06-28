@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getAllStocks, initiatePayment} from "../../utils/api";
+import { getAllStocks, initiatePayment } from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import symbolToDomain from "../../utils/symbolToDomain";
 import ModalCompra from "../../components/common/ModalCompra";
@@ -43,7 +43,6 @@ function StockMarket() {
     setLoading(false);
   }, [getAccessTokenSilently]);
 
-
   useEffect(() => {
     fetchStocks();
   }, [fetchStocks]);
@@ -51,8 +50,9 @@ function StockMarket() {
   useEffect(() => {
     let filtered = allStocks.filter(
       (stock) =>
-        stock.symbol.toLowerCase().includes(search.toLowerCase()) ||
-        stock.longName.toLowerCase().includes(search.toLowerCase())
+        stock.quantity > 0 &&
+        (stock.symbol.toLowerCase().includes(search.toLowerCase()) ||
+          stock.longName.toLowerCase().includes(search.toLowerCase()))
     );
 
     if (sortOption === "price-asc") {
@@ -71,29 +71,28 @@ function StockMarket() {
 
   const handleBuy = async (symbol) => {
     if (!buying[symbol]) return;
-  
+
     if (!isAuthenticated) {
       loginWithRedirect();
       return;
     }
-  
+
     try {
       const token = await getAccessTokenSilently();
       const quantity = parseInt(buying[symbol], 10);
-  
+
       const paymentData = await initiatePayment(symbol, quantity, token);
-  
+
       if (paymentData && paymentData.url && paymentData.token) {
-        // Construir el formulario dinámicamente
         const form = document.createElement("form");
         form.method = "POST";
         form.action = paymentData.url;
-  
+
         const input = document.createElement("input");
         input.type = "hidden";
         input.name = "token_ws";
         input.value = paymentData.token;
-  
+
         form.appendChild(input);
         document.body.appendChild(form);
         form.submit();
