@@ -12,7 +12,6 @@ function Home() {
   const [heartbeat, setHeartbeat] = useState(false);
 
   useEffect(() => {
-
     async function registerUser() {
       try {
         const token = await getAccessTokenSilently();
@@ -24,6 +23,7 @@ function Home() {
           } else {
             sessionStorage.setItem("isAdmin", "false");
           }
+          window.dispatchEvent(new Event("sessionStorageUpdated"));
         }
       } catch (error) {
         console.error("Error registrando usuario:", error);

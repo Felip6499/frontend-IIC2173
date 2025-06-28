@@ -1,24 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 
 function Navbar() {
   const { isAuthenticated, loginWithRedirect, logout, isLoading, user } =
     useAuth0();
-  const [isAdmin, setIsAdmin] = useState(null);
-  const location = useLocation();
+  const [isAdmin, setIsAdmin] = useState(sessionStorage.getItem("isAdmin"));
 
   useEffect(() => {
-    if (isAuthenticated) {
+    const checkAdminStatus = () => {
       const adminStatus = sessionStorage.getItem("isAdmin");
       setIsAdmin(adminStatus);
-    } else {
-      setIsAdmin(null);
+    };
+
+    if (isAuthenticated) {
+      checkAdminStatus();
     }
-  }, [isAuthenticated, user, location]);
+
+    window.addEventListener("sessionStorageUpdated", checkAdminStatus);
+
+    return () => {
+      window.removeEventListener("sessionStorageUpdated", checkAdminStatus);
+    };
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     sessionStorage.clear();
+    setIsAdmin(null);
     logout({ logoutParams: { returnTo: window.location.origin } });
   };
 
