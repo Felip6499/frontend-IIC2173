@@ -82,7 +82,7 @@ function Navbar() {
             onMouseEnter={() => setShowDropdown(true)}
             onMouseLeave={() => setShowDropdown(false)}
           >
-            <span
+            <div
               style={{
                 color: "var(--accent-yellow)",
                 fontWeight: "bold",
@@ -91,58 +91,57 @@ function Navbar() {
               }}
             >
               Admin ▾
-            </span>
+            </div>
 
-            {showDropdown && (
-              <div
+            <div
+              style={{
+                position: "absolute",
+                top: "2rem",
+                left: 0,
+                backgroundColor: "var(--bg-dark)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                padding: "0.5rem 0",
+                minWidth: "180px",
+                zIndex: 1000,
+                display: showDropdown ? "block" : "none",
+              }}
+            >
+              <Link
+                to="/admin/my-stocks"
                 style={{
-                  position: "absolute",
-                  top: "2rem",
-                  left: 0,
-                  backgroundColor: "var(--bg-dark)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "8px",
-                  boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                  padding: "0.5rem 0",
-                  minWidth: "180px",
-                  zIndex: 1000,
+                  display: "block",
+                  padding: "0.6rem 1rem",
+                  color: "var(--text-light)",
+                  textDecoration: "none",
                 }}
               >
-                <Link
-                  to="/admin/my-stocks"
-                  style={{
-                    display: "block",
-                    padding: "0.6rem 1rem",
-                    color: "var(--text-light)",
-                    textDecoration: "none",
-                  }}
-                >
-                  Mis Stocks
-                </Link>
-                <Link
-                  to="/admin/auctions"
-                  style={{
-                    display: "block",
-                    padding: "0.6rem 1rem",
-                    color: "var(--text-light)",
-                    textDecoration: "none",
-                  }}
-                >
-                  Subastas
-                </Link>
-                <Link
-                  to="/admin/proposals"
-                  style={{
-                    display: "block",
-                    padding: "0.6rem 1rem",
-                    color: "var(--text-light)",
-                    textDecoration: "none",
-                  }}
-                >
-                  Propuestas
-                </Link>
-              </div>
-            )}
+                Mis Stocks
+              </Link>
+              <Link
+                to="/admin/auctions"
+                style={{
+                  display: "block",
+                  padding: "0.6rem 1rem",
+                  color: "var(--text-light)",
+                  textDecoration: "none",
+                }}
+              >
+                Subastas
+              </Link>
+              <Link
+                to="/admin/proposals"
+                style={{
+                  display: "block",
+                  padding: "0.6rem 1rem",
+                  color: "var(--text-light)",
+                  textDecoration: "none",
+                }}
+              >
+                Propuestas
+              </Link>
+            </div>
           </div>
         )}
       </div>
