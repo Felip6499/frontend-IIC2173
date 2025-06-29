@@ -9,15 +9,19 @@ function Auctions() {
   const { getAccessTokenSilently } = useAuth0();
 
   const fetchData = useCallback(async () => {
-    const token = await getAccessTokenSilently();
-    const offersData = await getOffers(token);
-    const myStocksData = await getAdminStocks(token);
-    setOffers(
-      offersData.filter(
-        (o) => String(o.group_id) !== process.env.REACT_APP_GROUP_ID
-      )
-    );
-    setMyStocks(myStocksData || []);
+    try {
+      const token = await getAccessTokenSilently();
+      const offersData = await getOffers(token);
+      const myStocksData = await getAdminStocks(token);
+      setOffers(
+        offersData.filter(
+          (o) => String(o.group_id) !== process.env.REACT_APP_GROUP_ID
+        )
+      );
+      setMyStocks(myStocksData || []);
+    } catch (error) {
+      console.error("Error fetching data for auctions:", error);
+    }
   }, [getAccessTokenSilently]);
 
   useEffect(() => {

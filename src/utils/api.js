@@ -212,7 +212,7 @@ export async function respondToProposal(proposal_id, response, token) {
   return result.data;
 }
 
-// CORREGIDA
+// 
 export async function getAdminStocks(token) {
   const response = await axios.get(
     `${process.env.REACT_APP_BACKEND_URL}/stocks`,
