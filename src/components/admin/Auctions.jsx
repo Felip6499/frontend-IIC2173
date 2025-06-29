@@ -15,7 +15,7 @@ function Auctions() {
       const token = await getAccessTokenSilently();
       const offersData = await getOffers(token);
       const myStocksData = await getAdminStocks(token);
-      setOffers(offersData.filter((o) => String(o.group_id) == "22"));
+      setOffers(offersData.filter((o) => String(o.group_id) === "22"));
       setMyStocks(myStocksData || []);
     } catch (error) {
       console.error("Error fetching data for auctions:", error);
