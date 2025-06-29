@@ -76,18 +76,23 @@ function Navbar() {
 
         {isAdmin === "true" && (
           <div
-            onMouseEnter={() => setShowDropdown(true)}
-            onMouseLeave={() => setShowDropdown(false)}
             style={{
               position: "relative",
-              display: "inline-block",
-              color: "var(--accent-yellow)",
-              fontWeight: "bold",
-              cursor: "pointer",
-              userSelect: "none",
             }}
+            onMouseEnter={() => setShowDropdown(true)}
+            onMouseLeave={() => setShowDropdown(false)}
           >
-            <span>Admin ▾</span>
+            <span
+              style={{
+                color: "var(--accent-yellow)",
+                fontWeight: "bold",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              Admin ▾
+            </span>
+
             {showDropdown && (
               <div
                 style={{
