@@ -212,15 +212,6 @@ export async function respondToProposal(proposal_id, response, token) {
   return result.data;
 }
 
-// 
-export async function getAdminStocks(token) {
-  const response = await axios.get(
-    `${process.env.REACT_APP_BACKEND_URL}/stocks`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  return response.data.stocks || response.data;
-}
-
 export async function getAdminStocks(token) {
   const response = await axios.get(
     `${process.env.REACT_APP_BACKEND_URL}/inventory`,
