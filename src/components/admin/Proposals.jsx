@@ -9,9 +9,7 @@ function Proposals() {
   const fetchProposals = useCallback(async () => {
     const token = await getAccessTokenSilently();
     const offersData = await getOffers(token);
-    const myOffers = offersData.filter(
-      (o) => String(o.group_id) === process.env.REACT_APP_GROUP_ID
-    );
+    const myOffers = offersData
     const allProposals = myOffers.flatMap((offer) =>
       offer.proposals.map((p) => ({ ...p, offerSymbol: offer.symbol }))
     );
