@@ -56,6 +56,7 @@ function Navbar() {
         >
           Stockify
         </Link>
+
         {isAdmin !== null && (
           <>
             <Link
@@ -72,13 +73,66 @@ function Navbar() {
             </Link>
           </>
         )}
+
         {isAdmin === "true" && (
-          <div className="admin-menu">
-            <span>Admin</span>
-            <div className="dropdown-content">
-              <Link to="/admin/my-stocks">Mis Stocks</Link>
-              <Link to="/admin/auctions">Subastas</Link>
-              <Link to="/admin/proposals">Propuestas</Link>
+          <div
+            style={{
+              position: "relative",
+              display: "inline-block",
+              color: "var(--accent-yellow)",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            <span>Admin ▾</span>
+            <div
+              style={{
+                position: "absolute",
+                top: "2rem",
+                left: 0,
+                backgroundColor: "var(--bg-dark)",
+                border: "1px solid var(--border)",
+                borderRadius: "8px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                padding: "0.5rem 0",
+                minWidth: "180px",
+                display: "none",
+              }}
+              className="admin-dropdown"
+            >
+              <Link
+                to="/admin/my-stocks"
+                style={{
+                  display: "block",
+                  padding: "0.6rem 1rem",
+                  color: "var(--text-light)",
+                  textDecoration: "none",
+                }}
+              >
+                Mis Stocks
+              </Link>
+              <Link
+                to="/admin/auctions"
+                style={{
+                  display: "block",
+                  padding: "0.6rem 1rem",
+                  color: "var(--text-light)",
+                  textDecoration: "none",
+                }}
+              >
+                Subastas
+              </Link>
+              <Link
+                to="/admin/proposals"
+                style={{
+                  display: "block",
+                  padding: "0.6rem 1rem",
+                  color: "var(--text-light)",
+                  textDecoration: "none",
+                }}
+              >
+                Propuestas
+              </Link>
             </div>
           </div>
         )}
@@ -98,6 +152,7 @@ function Navbar() {
                   padding: "0.5rem 1rem",
                   borderRadius: "8px",
                   cursor: "pointer",
+                  fontWeight: "bold",
                 }}
                 onClick={handleLogout}
               >
@@ -112,6 +167,7 @@ function Navbar() {
                 padding: "0.5rem 1rem",
                 borderRadius: "8px",
                 cursor: "pointer",
+                fontWeight: "bold",
               }}
               onClick={() => loginWithRedirect()}
             >
@@ -120,6 +176,21 @@ function Navbar() {
           )}
         </div>
       )}
+
+      <style>
+        {`
+          .admin-dropdown {
+            display: none;
+          }
+          .admin-menu:hover .admin-dropdown,
+          div[style*="position: relative"]:hover .admin-dropdown {
+            display: block;
+          }
+          .admin-dropdown a:hover {
+            background-color: var(--border);
+          }
+        `}
+      </style>
     </nav>
   );
 }
