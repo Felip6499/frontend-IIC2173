@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { getAllStocks, initiatePayment } from "../../utils/api";
+import {
+  getAllStocks,
+  initiatePayment,
+  buyStockForAdmin,
+} from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import symbolToDomain from "../../utils/symbolToDomain";
 import ModalCompra from "../../components/common/ModalCompra";
@@ -33,7 +37,26 @@ function StockMarket() {
   });
 
   const navigate = useNavigate();
+  const handleAdminBuy = async (symbol) => {
+    if (!buying[symbol]) return;
+    try {
+      const token = await getAccessTokenSilently();
+      const quantity = parseInt(buying[symbol], 10);
+      await buyStockForAdmin(symbol, quantity, token);
+      alert(
+        `Se han comprado ${quantity} de ${symbol} para el inventario de subastas.`
+      );
+      fetchStocks();
+    } catch (err) {
+      alert(
+        `Error al comprar para admin: ${
+          err.response?.data?.error || err.message
+        }`
+      );
+    }
+  };
 
+  const isAdmin = sessionStorage.getItem("isAdmin") === "true";
   const fetchStocks = useCallback(async () => {
     const token = await getAccessTokenSilently();
     setLoading(true);
@@ -221,6 +244,7 @@ function StockMarket() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "flex-end",
+                gap: "0.5rem",
               }}
             >
               <input
@@ -260,6 +284,25 @@ function StockMarket() {
               >
                 Comprar
               </button>
+              {isAdmin && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAdminBuy(stock.symbol);
+                  }}
+                  style={{
+                    width: "130px",
+                    padding: "0.6rem",
+                    border: "none",
+                    borderRadius: "6px",
+                    backgroundColor: "var(--green)",
+                    cursor: "pointer",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Comprar para Subastar
+                </button>
+              )}
             </div>
           </div>
         ))}

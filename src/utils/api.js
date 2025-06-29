@@ -80,7 +80,7 @@ export async function getAllStocks(page = 1, count = 6, token) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      }
+    }
   );
   return response.data;
 }
@@ -91,7 +91,7 @@ export async function getStockBySymbol(symbol, token) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      }
+    }
   );
   return response.data[0];
 }
@@ -157,7 +157,74 @@ export async function postUserEmail(email, token) {
 
     return response.data;
   } catch (error) {
-    console.error("Error en postUserEmail:", error.response?.data || error.message);
+    console.error(
+      "Error en postUserEmail:",
+      error.response?.data || error.message
+    );
     throw error;
   }
+}
+
+export async function getOffers(token) {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BACKEND_URL}/offers`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data.offers;
+}
+
+// Crear una nueva oferta (subastar)
+export async function createOffer(symbol, quantity, token) {
+  const response = await axios.post(
+    `${process.env.REACT_APP_BACKEND_URL}/offers`,
+    { symbol, quantity },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
+}
+
+// Crear una propuesta de intercambio para una oferta
+export async function createProposal(auction_id, symbol, quantity, token) {
+  const response = await axios.post(
+    `${process.env.REACT_APP_BACKEND_URL}/proposals`,
+    { auction_id, symbol, quantity },
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return response.data;
+}
+
+// Responder a una propuesta (aceptar/rechazar)
+export async function respondToProposal(proposal_id, response, token) {
+  const result = await axios.post(
+    `${process.env.REACT_APP_BACKEND_URL}/proposals/${proposal_id}/respond`,
+    { response }, // response puede ser 'accept' o 'reject'
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  return result.data;
+}
+
+// Obtener los stocks que el admin ha comprado para el grupo
+export async function getAdminStocks(token) {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BACKEND_URL}/admin/stocks`, // Endpoint asumido
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+}
+
+// Comprar acciones para el inventario del admin (para subastar)
+export async function buyStockForAdmin(symbol, quantity, token) {
+  return axios.post(
+    `${process.env.REACT_APP_BACKEND_URL}/admin/buy-stock`, // Endpoint asumido
+    { symbol, quantity },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 }

@@ -72,6 +72,16 @@ function Navbar() {
             </Link>
           </>
         )}
+        {isAdmin === "true" && (
+          <div className="admin-menu">
+            <span>Admin</span>
+            <div className="dropdown-content">
+              <Link to="/admin/my-stocks">Mis Stocks</Link>
+              <Link to="/admin/auctions">Subastas</Link>
+              <Link to="/admin/proposals">Propuestas</Link>
+            </div>
+          </div>
+        )}
       </div>
 
       {!isLoading && (
