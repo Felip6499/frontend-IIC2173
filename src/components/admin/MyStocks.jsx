@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
-import { getAdminStocks, createOffer } from "../../utils/api";
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
+import { getAdminStocks, createOffer } from '../../utils/api';
 
 function MyStocks() {
   const [stocks, setStocks] = useState([]);
@@ -12,9 +12,10 @@ function MyStocks() {
     try {
       const token = await getAccessTokenSilently();
       const data = await getAdminStocks(token);
-      setStocks(data || []);
+      setStocks(data.stocks || []);
     } catch (error) {
       console.error("Error fetching admin stocks:", error);
+      setStocks([]);
     } finally {
       setLoading(false);
     }
@@ -37,39 +38,24 @@ function MyStocks() {
       fetchAdminStocks();
       setOffering({});
     } catch (error) {
-      alert(
-        `Error al crear la oferta: ${
-          error.response?.data?.error || error.message
-        }`
-      );
+      alert(`Error al crear la oferta: ${error.response?.data?.error || error.message}`);
     }
   };
 
   if (loading) return <div>Cargando mis acciones...</div>;
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div style={{ padding: '2rem' }}>
       <h1>Mis Acciones para Subastar</h1>
-      {stocks.map((stock) => (
-        <div
-          key={stock.symbol}
-          style={{
-            border: "1px solid #ccc",
-            padding: "1rem",
-            margin: "1rem 0",
-          }}
-        >
-          <h2>
-            {stock.symbol} ({stock.longName})
-          </h2>
+      {stocks.map(stock => (
+        <div key={stock.symbol} style={{ border: '1px solid #ccc', padding: '1rem', margin: '1rem 0' }}>
+          <h2>{stock.symbol} ({stock.longName})</h2>
           <p>Cantidad disponible: {stock.quantity}</p>
           <input
             type="number"
             placeholder="Cantidad a ofrecer"
-            value={offering[stock.symbol] || ""}
-            onChange={(e) =>
-              setOffering({ ...offering, [stock.symbol]: e.target.value })
-            }
+            value={offering[stock.symbol] || ''}
+            onChange={(e) => setOffering({ ...offering, [stock.symbol]: e.target.value })}
           />
           <button onClick={() => handleOffer(stock.symbol)}>Subastar</button>
         </div>

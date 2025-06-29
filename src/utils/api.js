@@ -165,6 +165,7 @@ export async function postUserEmail(email, token) {
   }
 }
 
+// Obtener todas las ofertas (subastas)
 export async function getOffers(token) {
   const response = await axios.get(
     `${process.env.REACT_APP_BACKEND_URL}/offers`,
@@ -211,20 +212,11 @@ export async function respondToProposal(proposal_id, response, token) {
   return result.data;
 }
 
-// Obtener los stocks que el admin ha comprado para el grupo
+// CORREGIDA
 export async function getAdminStocks(token) {
   const response = await axios.get(
-    `${process.env.REACT_APP_BACKEND_URL}/admin/stocks`, // Endpoint asumido
+    `${process.env.REACT_APP_BACKEND_URL}/stocks`,
     { headers: { Authorization: `Bearer ${token}` } }
   );
-  return response.data;
-}
-
-// Comprar acciones para el inventario del admin (para subastar)
-export async function buyStockForAdmin(symbol, quantity, token) {
-  return axios.post(
-    `${process.env.REACT_APP_BACKEND_URL}/admin/buy-stock`, // Endpoint asumido
-    { symbol, quantity },
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
+  return response.data.stocks || response.data;
 }
