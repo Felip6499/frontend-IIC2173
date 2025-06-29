@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
 
@@ -7,6 +7,7 @@ function Navbar() {
     useAuth0();
   const [isAdmin, setIsAdmin] = useState(sessionStorage.getItem("isAdmin"));
   const [showDropdown, setShowDropdown] = useState(false);
+  const hideTimeoutRef = useRef(null);
 
   useEffect(() => {
     const checkAdminStatus = () => {
@@ -28,6 +29,19 @@ function Navbar() {
     sessionStorage.clear();
     setIsAdmin(null);
     logout({ logoutParams: { returnTo: window.location.origin } });
+  };
+
+  const handleMouseEnter = () => {
+    if (hideTimeoutRef.current) {
+      clearTimeout(hideTimeoutRef.current);
+    }
+    setShowDropdown(true);
+  };
+
+  const handleMouseLeave = () => {
+    hideTimeoutRef.current = setTimeout(() => {
+      setShowDropdown(false);
+    }, 500); // Espera 0.5 segundos antes de ocultar
   };
 
   return (
@@ -76,11 +90,9 @@ function Navbar() {
 
         {isAdmin === "true" && (
           <div
-            style={{
-              position: "relative",
-            }}
-            onMouseEnter={() => setShowDropdown(true)}
-            onMouseLeave={() => setShowDropdown(false)}
+            style={{ position: "relative" }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <div
               style={{
@@ -93,55 +105,56 @@ function Navbar() {
               Admin ▾
             </div>
 
-            <div
-              style={{
-                position: "absolute",
-                top: "2rem",
-                left: 0,
-                backgroundColor: "var(--bg-dark)",
-                border: "1px solid var(--border)",
-                borderRadius: "8px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                padding: "0.5rem 0",
-                minWidth: "180px",
-                zIndex: 1000,
-                display: showDropdown ? "block" : "none",
-              }}
-            >
-              <Link
-                to="/admin/my-stocks"
+            {showDropdown && (
+              <div
                 style={{
-                  display: "block",
-                  padding: "0.6rem 1rem",
-                  color: "var(--text-light)",
-                  textDecoration: "none",
+                  position: "absolute",
+                  top: "2rem",
+                  left: 0,
+                  backgroundColor: "var(--bg-dark)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                  padding: "0.5rem 0",
+                  minWidth: "180px",
+                  zIndex: 1000,
                 }}
               >
-                Mis Stocks
-              </Link>
-              <Link
-                to="/admin/auctions"
-                style={{
-                  display: "block",
-                  padding: "0.6rem 1rem",
-                  color: "var(--text-light)",
-                  textDecoration: "none",
-                }}
-              >
-                Subastas
-              </Link>
-              <Link
-                to="/admin/proposals"
-                style={{
-                  display: "block",
-                  padding: "0.6rem 1rem",
-                  color: "var(--text-light)",
-                  textDecoration: "none",
-                }}
-              >
-                Propuestas
-              </Link>
-            </div>
+                <Link
+                  to="/admin/my-stocks"
+                  style={{
+                    display: "block",
+                    padding: "0.6rem 1rem",
+                    color: "var(--text-light)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Mis Stocks
+                </Link>
+                <Link
+                  to="/admin/auctions"
+                  style={{
+                    display: "block",
+                    padding: "0.6rem 1rem",
+                    color: "var(--text-light)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Subastas
+                </Link>
+                <Link
+                  to="/admin/proposals"
+                  style={{
+                    display: "block",
+                    padding: "0.6rem 1rem",
+                    color: "var(--text-light)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Propuestas
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>
