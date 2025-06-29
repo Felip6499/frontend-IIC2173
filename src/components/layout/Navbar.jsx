@@ -6,6 +6,7 @@ function Navbar() {
   const { isAuthenticated, loginWithRedirect, logout, isLoading, user } =
     useAuth0();
   const [isAdmin, setIsAdmin] = useState(sessionStorage.getItem("isAdmin"));
+  const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
     const checkAdminStatus = () => {
@@ -18,7 +19,6 @@ function Navbar() {
     }
 
     window.addEventListener("sessionStorageUpdated", checkAdminStatus);
-
     return () => {
       window.removeEventListener("sessionStorageUpdated", checkAdminStatus);
     };
@@ -76,64 +76,68 @@ function Navbar() {
 
         {isAdmin === "true" && (
           <div
+            onMouseEnter={() => setShowDropdown(true)}
+            onMouseLeave={() => setShowDropdown(false)}
             style={{
               position: "relative",
               display: "inline-block",
               color: "var(--accent-yellow)",
               fontWeight: "bold",
               cursor: "pointer",
+              userSelect: "none",
             }}
           >
             <span>Admin ▾</span>
-            <div
-              style={{
-                position: "absolute",
-                top: "2rem",
-                left: 0,
-                backgroundColor: "var(--bg-dark)",
-                border: "1px solid var(--border)",
-                borderRadius: "8px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
-                padding: "0.5rem 0",
-                minWidth: "180px",
-                display: "none",
-              }}
-              className="admin-dropdown"
-            >
-              <Link
-                to="/admin/my-stocks"
+            {showDropdown && (
+              <div
                 style={{
-                  display: "block",
-                  padding: "0.6rem 1rem",
-                  color: "var(--text-light)",
-                  textDecoration: "none",
+                  position: "absolute",
+                  top: "2rem",
+                  left: 0,
+                  backgroundColor: "var(--bg-dark)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 10px rgba(0,0,0,0.2)",
+                  padding: "0.5rem 0",
+                  minWidth: "180px",
+                  zIndex: 1000,
                 }}
               >
-                Mis Stocks
-              </Link>
-              <Link
-                to="/admin/auctions"
-                style={{
-                  display: "block",
-                  padding: "0.6rem 1rem",
-                  color: "var(--text-light)",
-                  textDecoration: "none",
-                }}
-              >
-                Subastas
-              </Link>
-              <Link
-                to="/admin/proposals"
-                style={{
-                  display: "block",
-                  padding: "0.6rem 1rem",
-                  color: "var(--text-light)",
-                  textDecoration: "none",
-                }}
-              >
-                Propuestas
-              </Link>
-            </div>
+                <Link
+                  to="/admin/my-stocks"
+                  style={{
+                    display: "block",
+                    padding: "0.6rem 1rem",
+                    color: "var(--text-light)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Mis Stocks
+                </Link>
+                <Link
+                  to="/admin/auctions"
+                  style={{
+                    display: "block",
+                    padding: "0.6rem 1rem",
+                    color: "var(--text-light)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Subastas
+                </Link>
+                <Link
+                  to="/admin/proposals"
+                  style={{
+                    display: "block",
+                    padding: "0.6rem 1rem",
+                    color: "var(--text-light)",
+                    textDecoration: "none",
+                  }}
+                >
+                  Propuestas
+                </Link>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -176,21 +180,6 @@ function Navbar() {
           )}
         </div>
       )}
-
-      <style>
-        {`
-          .admin-dropdown {
-            display: none;
-          }
-          .admin-menu:hover .admin-dropdown,
-          div[style*="position: relative"]:hover .admin-dropdown {
-            display: block;
-          }
-          .admin-dropdown a:hover {
-            background-color: var(--border);
-          }
-        `}
-      </style>
     </nav>
   );
 }
