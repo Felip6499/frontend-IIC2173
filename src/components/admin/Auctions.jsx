@@ -15,7 +15,7 @@ function Auctions() {
       const myStocksData = await getAdminStocks(token);
       setOffers(
         offersData.filter(
-          (o) => String(o.group_id) !== process.env.REACT_APP_GROUP_ID
+          (o) => String(o.group_id) !== '22'
         )
       );
       setMyStocks(myStocksData || []);
